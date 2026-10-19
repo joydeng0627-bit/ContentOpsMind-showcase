@@ -1,0 +1,170 @@
+{
+  "taxonomy_version": "1.0.0",
+  "decisions": ["pass", "changes_required", "blocked"],
+  "severities": ["low", "medium", "high"],
+  "rules": [
+    {
+      "id": "absolute_price",
+      "default_severity": "high",
+      "decision": "blocked",
+      "evidence_required": true,
+      "description": "无法证明的最低价或绝对价格优势"
+    },
+    {
+      "id": "unsupported_comparison",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": true,
+      "description": "缺少依据的比较性主张"
+    },
+    {
+      "id": "unsupported_ranking",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": true,
+      "description": "缺少依据的排名或领先主张",
+      "safe_when": "比较范围明确且当前上下文提供可追溯的报告或数据依据；有依据的同品牌系列内客观比较不命中"
+    },
+    {
+      "id": "unsupported_efficacy",
+      "default_severity": "high",
+      "decision": "blocked",
+      "evidence_required": true,
+      "description": "未经证实的疾病、健康或功效承诺"
+    },
+    {
+      "id": "missing_threshold",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": false,
+      "description": "优惠文案遗漏必要门槛",
+      "detect_when": "草稿写明立减或优惠金额，但当前已核实规则存在满额、会员、渠道等必要条件且草稿未披露"
+    },
+    {
+      "id": "incorrect_end_date",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": true,
+      "description": "活动日期与当前有效规则不一致"
+    },
+    {
+      "id": "scope_expansion",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": true,
+      "description": "扩大门店、商品或人群适用范围"
+    },
+    {
+      "id": "missing_inventory_limit",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": false,
+      "description": "遗漏影响消费者判断的库存限制"
+    },
+    {
+      "id": "guaranteed_reward",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": true,
+      "description": "将概率或上限权益写成必得承诺"
+    },
+    {
+      "id": "citation_mismatch",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": true,
+      "description": "结论与当前引用材料不一致",
+      "detect_when": "草稿将有限库存写成充足或不限量、扩大证据范围，或引用内容无法支持对应结论"
+    },
+    {
+      "id": "unsupported_green_claim",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": true,
+      "description": "缺少依据的环保主张",
+      "safe_when": "当前上下文存在可追溯文件且明确支持相同环保比例、等级或结论"
+    },
+    {
+      "id": "competitor_disparagement",
+      "default_severity": "high",
+      "decision": "blocked",
+      "evidence_required": true,
+      "description": "贬损或无依据攻击竞品"
+    },
+    {
+      "id": "anxiety_marketing",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": false,
+      "description": "通过羞辱或焦虑施压消费"
+    },
+    {
+      "id": "fabricated_testimonial",
+      "default_severity": "high",
+      "decision": "blocked",
+      "evidence_required": true,
+      "description": "虚构用户身份或使用体验",
+      "detect_when": "营销主体以第一人称声称亲测、连续使用或获得具体效果，但当前上下文没有该真实用户证言；若同时包含功效承诺，两个标签同时保留"
+    },
+    {
+      "id": "missing_scope_qualifier",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": true,
+      "description": "遗漏影响优惠成立的渠道、商品或人群范围"
+    },
+    {
+      "id": "missing_delivery_link",
+      "default_severity": "low",
+      "decision": "pass",
+      "evidence_required": false,
+      "description": "文案已完成但发送前仍需配置活动短链"
+    },
+    {
+      "id": "channel_length_exceeded",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": false,
+      "description": "正文或标题超过渠道长度限制"
+    },
+    {
+      "id": "missing_unsubscribe",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": false,
+      "description": "营销短信遗漏退订提示"
+    },
+    {
+      "id": "promotion_tier_mismatch",
+      "default_severity": "high",
+      "decision": "blocked",
+      "evidence_required": true,
+      "description": "文案优惠档位与当前有效规则不一致"
+    },
+    {
+      "id": "ineligible_promotion_recommendation",
+      "default_severity": "high",
+      "decision": "blocked",
+      "evidence_required": true,
+      "description": "推荐的商品金额不满足对应优惠门槛"
+    },
+    {
+      "id": "unknown_rule",
+      "default_severity": "medium",
+      "decision": "changes_required",
+      "evidence_required": false,
+      "description": "模型返回了无法映射到当前规则版本的风险标签"
+    }
+  ],
+  "normalization": {
+    "suppresses": { "unsupported_green_claim": ["unsupported_ranking"] },
+    "cooccurrence": [
+      {
+        "when": "missing_inventory_limit",
+        "text_any": ["前", "限量", "库存", "份", "名"],
+        "contradiction_any": ["充足", "不限量", "都有", "人人"],
+        "add": "citation_mismatch"
+      }
+    ]
+  }
+}

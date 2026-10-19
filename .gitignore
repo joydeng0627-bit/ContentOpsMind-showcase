@@ -1,0 +1,47 @@
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+# Local runtime, caches, databases and personal tooling
+.git/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.idea/
+.vscode/
+.agents/
+.codex/
+logs/
+tmp/
+build/
+dist/
+*.egg-info/
+*.sqlite*
+*.db
+*.docx
+*.pdf
+*.zip
+# Only these synthetic fixture files are approved for tracking.
+data/**
+!data/rag_docs/
+!data/rag_docs/brand_generation_knowledge.json
+!data/rag_docs/customer_service_knowledge.json
+!data/eval/
+!data/eval/skill_regression_v1.json
+# Raw documents, labels and traces stay private.
+raw/
+source_materials/
+source_texts/
+*_snapshot.json
+*_snapshot.jsonl
+*.bak
+.DS_Store
+Thumbs.db

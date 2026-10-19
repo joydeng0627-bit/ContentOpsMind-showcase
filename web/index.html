@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f6f5" />
+    <title>ContentOpsMind · 内容运营智能工作台</title>
+    <link rel="stylesheet" href="./styles.css?v=20261003-generation-staging-1" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-head">
+          <a class="brand" href="#workspaceView" aria-label="ContentOpsMind 智能对话">
+            <span class="brand-mark" aria-hidden="true">C</span>
+            <span class="brand-copy">
+              <strong>ContentOpsMind</strong>
+              <small>内容运营智能工作台</small>
+            </span>
+          </a>
+          <div class="sidebar-head-actions">
+            <button
+              class="icon-button sidebar-collapse-button"
+              id="collapseSidebarBtn"
+              type="button"
+              title="折叠侧栏"
+              aria-label="折叠侧栏"
+              aria-expanded="true"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" />
+                <path d="M4 4h16v16H4z" />
+              </svg>
+            </button>
+            <button
+              class="icon-button mobile-only"
+              id="closeSidebarBtn"
+              type="button"
+              aria-label="关闭侧栏"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+          </div>
+        </div>
+
+        <button class="new-chat-button" id="newChatBtn" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+          <span class="nav-label">新建对话</span>
+          <kbd class="new-chat-shortcut">N</kbd>
+        </button>
+
+        <nav class="tool-nav" aria-label="工作台导航">
+          <p class="nav-section-label">工作空间</p>
+          <button class="nav-item active" type="button" data-view="workspace">
+            <span class="nav-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14v9H9l-4 3v-12z" /></svg
+            ></span>
+            <span class="nav-label">智能对话</span>
+          </button>
+          <button class="nav-item" type="button" data-view="campaign">
+            <span class="nav-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 5h16v14H4z" />
+                <path d="M8 3v4M16 3v4M4 9h16M8 13h3M8 16h6" /></svg
+            ></span>
+            <span class="nav-label">活动工作流</span>
+          </button>
+          <button class="nav-item" type="button" data-view="trace">
+            <span class="nav-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="5" cy="12" r="2" />
+                <circle cx="19" cy="6" r="2" />
+                <circle cx="19" cy="18" r="2" />
+                <path d="M7 12h4c3 0 3-6 6-6M11 12c3 0 3 6 6 6" /></svg
+            ></span>
+            <span class="nav-label">Agent Trace</span>
+          </button>
+          <button class="nav-item" type="button" data-view="evaluation">
+            <span class="nav-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 19V9M12 19V5M19 19v-7M3 19h18" /></svg
+            ></span>
+            <span class="nav-label">评测看板</span>
+          </button>
+          <button class="nav-item" type="button" data-view="knowledge">
+            <span class="nav-icon"
+              ><svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M4 5.5A2.5 2.5 0 016.5 3H11v16H6.5A2.5 2.5 0 004 21V5.5zM20 5.5A2.5 2.5 0 0017.5 3H13v16h4.5A2.5 2.5 0 0120 21V5.5z"
+                /></svg
+            ></span>
+            <span class="nav-label">知识库</span>
+          </button>
+        </nav>
+
+        <section class="history-section" aria-labelledby="historyHeading">
+          <div class="section-label">
+            <span id="historyHeading">最近对话</span>
+            <button id="clearHistoryBtn" type="button" title="清空对话记录">清空</button>
+          </div>
+          <div class="conversation-list" id="conversationList"></div>
+        </section>
+
+        <div class="sidebar-foot">
+          <div class="api-state" title="后端服务状态">
+            <span class="status-dot" id="statusDot" aria-hidden="true"></span>
+            <span class="sidebar-foot-label">服务状态</span>
+            <strong id="apiStatus">检测中</strong>
+          </div>
+          <label class="user-setting">
+            <span class="sidebar-foot-label">用户</span>
+            <input id="userId" value="ops_demo" aria-label="用户 ID" />
+          </label>
+        </div>
+      </aside>
+      <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="topbar-leading">
+            <button
+              class="icon-button mobile-only"
+              id="openSidebarBtn"
+              type="button"
+              aria-label="打开侧栏"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+            </button>
+            <div class="topbar-context">
+              <div class="topbar-title">
+                <h1 id="viewTitle">智能对话</h1>
+                <span class="context-divider" aria-hidden="true"></span>
+                <span id="currentConversationTitle">新对话</span>
+              </div>
+              <p class="topbar-subtitle" id="viewSubtitle">内容任务分析、Agent 编排与知识增强</p>
+            </div>
+          </div>
+          <div class="top-actions">
+            <span class="connection-state" id="connectionState"
+              ><span class="status-dot" aria-hidden="true"></span>正在检测</span
+            >
+            <span class="model-badge" id="modelBadge"
+              ><span aria-hidden="true"></span>Agent + RAG</span
+            >
+            <button
+              class="icon-button"
+              id="refreshAllBtn"
+              type="button"
+              title="刷新当前模块"
+              aria-label="刷新当前模块"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20 6v5h-5" />
+                <path d="M18.5 9A7 7 0 106 18.5" />
+              </svg>
+            </button>
+            <a
+              class="icon-button"
+              id="docsLink"
+              href="/docs"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="打开 API 文档"
+              aria-label="打开 API 文档"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 3h7l4 4v14H7z" />
+                <path d="M14 3v5h5M10 13h5M10 17h5" />
+              </svg>
+            </a>
+          </div>
+        </header>
+
+        <section class="view chat-view active" id="workspaceView">
+          <div class="chat-scroll" id="chatScroll">
+            <div class="chat-content">
+              <div class="welcome" id="welcomeState">
+                <div class="welcome-kicker">
+                  <span aria-hidden="true"></span>Content operations workspace
+                </div>
+                <h2>从一个内容任务开始</h2>
+                <p>
+                  描述目标、渠道和约束，系统将识别意图、编排专业
+                  Agent，并在需要时结合知识库生成结果。
+                </p>
+                <div class="starter-grid">
+                  <button type="button" data-prompt="帮我写一篇澄光便携咖啡杯的微信公众号推广文案">
+                    <span class="starter-index">01</span><strong>生成营销文案</strong
+                    ><span>内容创作 · 渠道约束</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-prompt="检查这段文案有没有广告法风险：全网最低价，100%有效，错过后悔一年"
+                  >
+                    <span class="starter-index">02</span><strong>检查合规风险</strong
+                    ><span>识别极限词与不当承诺</span>
+                  </button>
+                  <button type="button" data-prompt="把新品上市文案改成更有种草感的小红书风格">
+                    <span class="starter-index">03</span><strong>调整内容风格</strong
+                    ><span>适配渠道和表达语气</span>
+                  </button>
+                  <button
+                    type="button"
+                    data-prompt="检查活动页规则有没有遗漏：满399减80，今晚24点截止，仅限自营正价商品"
+                  >
+                    <span class="starter-index">04</span><strong>校验活动规则</strong
+                    ><span>发现缺失条件与歧义</span>
+                  </button>
+                </div>
+                <div class="capability-line" aria-label="系统能力">
+                  <span>Intent 识别</span><i aria-hidden="true"></i><span>Agent 编排</span
+                  ><i aria-hidden="true"></i><span>知识增强</span><i aria-hidden="true"></i
+                  ><span>质量评审</span>
+                </div>
+              </div>
+              <div class="message-list" id="messageList" aria-live="polite"></div>
+            </div>
+          </div>
+          <div class="request-status" id="requestStatus" role="status" aria-live="polite"></div>
+
+          <div class="composer-wrap">
+            <div class="composer-stack">
+              <div class="task-options" id="taskOptions">
+                <label
+                  ><span>任务类型</span
+                  ><select id="taskType">
+                    <option value="copy_generation">文案生成</option>
+                    <option value="compliance_check">合规检查</option>
+                    <option value="rule_check">规则校验</option>
+                    <option value="style_adaptation">风格改写</option>
+                    <option value="content_review">内容评审</option>
+                  </select></label
+                >
+                <label
+                  ><span>发布渠道</span
+                  ><select id="channel">
+                    <option>短信</option>
+                    <option>Push</option>
+                    <option>小红书</option>
+                    <option>公众号</option>
+                    <option>活动页</option>
+                  </select></label
+                >
+                <label
+                  ><span>表达风格</span
+                  ><select id="tone">
+                    <option>品牌克制</option>
+                    <option>转化直接</option>
+                    <option>小红书种草</option>
+                    <option>公众号专业</option>
+                    <option>简洁通知</option>
+                  </select></label
+                >
+              </div>
+              <div class="composer" id="composer">
+                <div class="composer-label">向 ContentOpsMind 下达任务</div>
+                <textarea
+                  id="messageInput"
+                  rows="1"
+                  placeholder="描述内容目标、渠道、受众和业务约束…"
+                  aria-label="消息内容"
+                ></textarea>
+                <div class="composer-actions">
+                  <button
+                    class="tune-button"
+                    id="toggleOptionsBtn"
+                    type="button"
+                    aria-expanded="false"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 5v4M6 15v4" />
+                    </svg>
+                    任务设置
+                  </button>
+                  <span class="composer-status" id="composerStatus"></span>
+                  <span class="composer-hint"
+                    ><kbd>Enter</kbd> 发送 · <kbd>Shift</kbd> + <kbd>Enter</kbd> 换行</span
+                  >
+                  <button class="send-button" id="sendBtn" type="button" aria-label="发送消息">
+                    <svg class="send-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 19V5M6 11l6-6 6 6" />
+                    </svg>
+                    <svg class="stop-icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="7" y="7" width="10" height="10" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <p class="disclaimer">AI 生成内容可能存在错误，发布前请结合业务规则复核。</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="view tool-view campaign-view" id="campaignView">
+          <div class="page-heading campaign-heading">
+            <div>
+              <p>Campaign Operations</p>
+              <h2>活动内容工作流</h2>
+              <span>从活动 Brief 到多渠道版本、审核、人工审批与交付。</span>
+            </div>
+            <button class="secondary" id="loadCampaignWorkflowsBtn" type="button">
+              刷新工作流
+            </button>
+          </div>
+          <div class="campaign-layout">
+            <aside class="campaign-control-column">
+              <section class="panel campaign-brief-panel">
+                <div class="campaign-section-heading">
+                  <span>01</span>
+                  <div>
+                    <h3>活动 Brief</h3>
+                    <p>明确业务事实与交付边界</p>
+                  </div>
+                </div>
+                <form id="campaignBriefForm">
+                  <div class="campaign-field-grid">
+                    <label class="field"
+                      ><span>活动名称 *</span
+                      ><input id="campaignName" required placeholder="例如：春季会员焕新计划"
+                    /></label>
+                    <label class="field"
+                      ><span>活动目标 *</span
+                      ><input
+                        id="campaignObjective"
+                        required
+                        placeholder="例如：提升新品认知与到店转化"
+                    /></label>
+                    <label class="field"
+                      ><span>推广产品 *</span
+                      ><input id="campaignProduct" required placeholder="产品或服务名称"
+                    /></label>
+                    <label class="field"
+                      ><span>目标受众 *</span
+                      ><input id="campaignAudience" required placeholder="会员、新客或细分人群"
+                    /></label>
+                  </div>
+                  <fieldset class="campaign-channel-picker">
+                    <legend>交付渠道 *</legend>
+                    <label
+                      ><input type="checkbox" name="campaignChannel" value="短信" checked /><span
+                        >短信</span
+                      ></label
+                    >
+                    <label
+                      ><input type="checkbox" name="campaignChannel" value="Push" /><span
+                        >Push</span
+                      ></label
+                    >
+                    <label
+                      ><input type="checkbox" name="campaignChannel" value="小红书" checked /><span
+                        >小红书</span
+                      ></label
+                    >
+                    <label
+                      ><input type="checkbox" name="campaignChannel" value="公众号" /><span
+                        >公众号</span
+                      ></label
+                    >
+                  </fieldset>
+                  <label class="field"
+                    ><span>事实清单 <small>每行 key: value</small></span
+                    ><textarea
+                      id="campaignFacts"
+                      rows="4"
+                      placeholder="活动时间: 8月10日至8月20日&#10;优惠规则: 会员第二杯半价"
+                    ></textarea>
+                  </label>
+                  <label class="field"
+                    ><span>业务约束 <small>每行一条</small></span
+                    ><textarea
+                      id="campaignConstraints"
+                      rows="3"
+                      placeholder="不得使用绝对化用语&#10;价格以门店实际为准"
+                    ></textarea>
+                  </label>
+                  <label class="field"
+                    ><span>补充说明</span
+                    ><textarea
+                      id="campaignBriefText"
+                      rows="4"
+                      placeholder="补充活动背景、品牌要求和期望交付形式"
+                    ></textarea>
+                  </label>
+                  <div class="campaign-form-actions">
+                    <button class="primary" id="createCampaignBtn" type="submit">
+                      创建并保存 Brief</button
+                    ><button class="secondary" id="resetCampaignBtn" type="reset">清空</button>
+                  </div>
+                  <p
+                    class="campaign-inline-status"
+                    id="campaignFormStatus"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    Brief 保存后可启动 Agent 工作流。
+                  </p>
+                </form>
+              </section>
+              <section class="campaign-list-section">
+                <div class="campaign-list-heading">
+                  <h3>最近工作流</h3>
+                  <span id="campaignWorkflowCount">0</span>
+                </div>
+                <div class="campaign-workflow-list" id="campaignWorkflowList">
+                  <div class="campaign-list-empty">尚未加载工作流</div>
+                </div>
+              </section>
+            </aside>
+
+            <section class="campaign-detail-column">
+              <div class="campaign-empty-workspace" id="campaignEmpty">
+                <span class="campaign-empty-index">READY / 00</span>
+                <h3>选择工作流，或创建新的活动 Brief</h3>
+                <p>
+                  执行后将在这里形成规划、知识检索、多渠道内容、事实核验、合规审核与人工审批的完整记录。
+                </p>
+              </div>
+              <div id="campaignDetail" hidden>
+                <header class="campaign-detail-header">
+                  <div>
+                    <div class="campaign-eyebrow">ACTIVE WORKFLOW</div>
+                    <h3 id="campaignDetailName">活动工作流</h3>
+                    <p id="campaignWorkflowMeta"></p>
+                  </div>
+                  <span class="campaign-status-badge" id="campaignStatusBadge">待执行</span>
+                </header>
+                <div
+                  class="campaign-stage-rail"
+                  id="campaignStageRail"
+                  aria-label="工作流执行阶段"
+                ></div>
+                <div class="campaign-command-bar">
+                  <button class="primary" id="runCampaignBtn" type="button">启动工作流</button>
+                  <button class="secondary" id="editCampaignBriefBtn" type="button" hidden>
+                    修改 Brief
+                  </button>
+                  <button class="secondary" id="refreshCampaignBtn" type="button">刷新详情</button>
+                  <button class="danger" id="cancelCampaignBtn" type="button" hidden>
+                    取消等待
+                  </button>
+                  <span id="campaignActionStatus" role="status" aria-live="polite">等待操作</span>
+                </div>
+                <section
+                  class="campaign-revision-panel"
+                  id="campaignClarificationPanel"
+                  hidden
+                ></section>
+                <section class="campaign-ledger-section">
+                  <div class="campaign-section-heading">
+                    <span>02</span>
+                    <div>
+                      <h3>渠道版本账本</h3>
+                      <p>生成内容、审核结论与版本沿革</p>
+                    </div>
+                  </div>
+                  <div class="campaign-version-list" id="campaignVersionList"></div>
+                </section>
+                <div class="campaign-review-grid">
+                  <section class="campaign-review-section">
+                    <div class="campaign-section-heading compact">
+                      <span>RAG</span>
+                      <div>
+                        <h3>知识引用</h3>
+                        <p>本次工作流冻结的检索证据</p>
+                      </div>
+                    </div>
+                    <div id="campaignCitationList"></div>
+                  </section>
+                  <section class="campaign-review-section">
+                    <div class="campaign-section-heading compact">
+                      <span>OPS</span>
+                      <div>
+                        <h3>执行摘要</h3>
+                        <p>成本、重试与恢复信息</p>
+                      </div>
+                    </div>
+                    <div id="campaignExecutionSummary"></div>
+                  </section>
+                </div>
+                <section class="campaign-revision-panel" id="campaignRevisionPanel" hidden>
+                  <div><strong>创建修订版本</strong><span id="campaignRevisionChannel"></span></div>
+                  <label class="field"
+                    ><span>修改要求</span
+                    ><textarea
+                      id="campaignRevisionInstruction"
+                      rows="3"
+                      placeholder="说明需要修改的事实、语气或合规问题"
+                    ></textarea>
+                  </label>
+                  <div class="button-row">
+                    <button class="primary" id="submitCampaignRevisionBtn" type="button">
+                      提交修订</button
+                    ><button class="secondary" id="cancelCampaignRevisionBtn" type="button">
+                      取消
+                    </button>
+                  </div>
+                </section>
+                <div class="campaign-review-grid">
+                  <section class="campaign-review-section">
+                    <div class="campaign-section-heading compact">
+                      <span>03</span>
+                      <div>
+                        <h3>审核记录</h3>
+                        <p>事实、合规与质量决策</p>
+                      </div>
+                    </div>
+                    <div id="campaignReviewList"></div>
+                  </section>
+                  <section class="campaign-approval-section">
+                    <div class="campaign-section-heading compact">
+                      <span>04</span>
+                      <div>
+                        <h3>人工审批</h3>
+                        <p>按最新渠道版本完成决策</p>
+                      </div>
+                    </div>
+                    <label class="field"
+                      ><span>审批人</span><input id="campaignReviewerId" value="ops_lead"
+                    /></label>
+                    <label class="field"
+                      ><span>审批意见</span
+                      ><textarea
+                        id="campaignApprovalComment"
+                        rows="3"
+                        placeholder="记录批准、驳回或要求修改的原因"
+                      ></textarea>
+                    </label>
+                    <p id="campaignApprovalGate" class="campaign-approval-gate" role="status"></p>
+                    <div class="button-row wrap">
+                      <button class="primary" id="approveCampaignBtn" type="button">
+                        批准最新版本</button
+                      ><button class="secondary" id="requestCampaignChangesBtn" type="button">
+                        要求修改</button
+                      ><button class="danger" id="rejectCampaignBtn" type="button">驳回</button>
+                    </div>
+                    <div id="campaignApprovalList"></div>
+                  </section>
+                </div>
+                <section class="campaign-delivery-section">
+                  <div>
+                    <span>05 / DELIVERY</span>
+                    <h3>版本交付</h3>
+                    <p>仅当所有渠道最新版本均已批准后可导出。</p>
+                  </div>
+                  <div class="button-row">
+                    <button class="secondary" id="downloadCampaignJsonBtn" type="button">
+                      下载 JSON</button
+                    ><button class="secondary" id="downloadCampaignMarkdownBtn" type="button">
+                      下载 Markdown
+                    </button>
+                  </div>
+                </section>
+                <details class="campaign-event-details">
+                  <summary>查看执行事件（<span id="campaignEventCount">0</span>）</summary>
+                  <div class="campaign-event-list" id="campaignEventList"></div>
+                </details>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view tool-view" id="traceView">
+          <div class="page-heading">
+            <div>
+              <p>可观测性</p>
+              <h2>Agent Trace</h2>
+              <span>查看意图识别、路由、检索和执行链路。</span>
+            </div>
+            <button class="secondary" id="loadTraceBtn">刷新记录</button>
+          </div>
+          <div class="split-grid">
+            <section class="panel">
+              <h3>最近请求</h3>
+              <div class="trace-list" id="traceList"></div>
+            </section>
+            <section class="panel">
+              <h3>Trace 详情</h3>
+              <div id="traceDetail" class="trace-detail empty-state">请选择一条请求。</div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view tool-view" id="evaluationView">
+          <div class="page-heading">
+            <div>
+              <p>质量保障</p>
+              <h2>评测看板</h2>
+              <span>查看线上表现并运行 LLM-as-Judge。</span>
+            </div>
+            <button class="secondary" id="loadDashboardBtn">刷新数据</button>
+          </div>
+          <div class="metric-grid" id="metricGrid"></div>
+          <div class="split-grid">
+            <section class="panel">
+              <h3>运行评测</h3>
+              <p class="panel-copy">知识问答回归使用真实 API；全量评测会产生更多模型调用。</p>
+              <div class="button-row wrap">
+                <button class="primary" id="runKnowledgeEvalBtn">知识问答回归</button
+                ><button class="secondary" id="runSmokeEvalBtn">抽样评测</button
+                ><button class="secondary" id="runIntentEvalBtn">意图评测</button
+                ><button class="danger" id="runFullEvalBtn">全量评测</button>
+              </div>
+              <div class="eval-case-list" id="knowledgeEvalResults" aria-live="polite"></div>
+              <pre class="json-box" id="evalOutput">等待评测。</pre>
+            </section>
+            <section class="panel">
+              <h3>Dashboard 数据</h3>
+              <pre class="json-box" id="dashboardOutput">等待加载。</pre>
+            </section>
+          </div>
+        </section>
+
+        <section class="view tool-view" id="knowledgeView">
+          <div class="page-heading">
+            <div>
+              <p>检索增强</p>
+              <h2>知识库</h2>
+              <span>验证活动规则、品牌规范和合规要求的召回效果。</span>
+            </div>
+            <button class="secondary" id="statsBtn">查看统计</button>
+          </div>
+          <div class="split-grid knowledge-grid">
+            <section class="panel">
+              <h3>发起检索</h3>
+              <label class="field"
+                ><span>知识库（手动选择）</span
+                ><select id="knowledgeLibrary">
+                  <option value="default">默认知识库</option>
+                </select></label
+              ><label class="field"
+                ><span>检索问题</span
+                ><textarea id="searchInput" rows="7">
+澄光便携咖啡杯有什么特点？活动规则是什么？</textarea></label
+              ><button class="primary" id="searchBtn">检索知识库</button>
+            </section>
+            <section class="panel">
+              <h3>检索结果</h3>
+              <pre class="json-box tall" id="knowledgeOutput">等待检索。</pre>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js?v=20261014-starbucks-raw-1"></script>
+  </body>
+</html>

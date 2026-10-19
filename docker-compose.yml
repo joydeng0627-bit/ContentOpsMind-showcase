@@ -1,0 +1,58 @@
+name: contentopsmind-public
+services:
+  redis:
+    image: redis:7-alpine
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--requirepass",
+        "${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}",
+      ]
+    environment:
+      REDIS_PASSWORD: "${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}"
+    volumes: ["redis-data:/data"]
+    healthcheck:
+      test: ["CMD-SHELL", 'REDISCLI_AUTH="$${REDIS_PASSWORD}" redis-cli ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  chromadb:
+    image: chromadb/chroma:1.5.9
+    ports: ["127.0.0.1:8021:8000"]
+    environment:
+      IS_PERSISTENT: "TRUE"
+      ANONYMIZED_TELEMETRY: "FALSE"
+    volumes: ["chroma-data:/data"]
+  app:
+    build:
+      context: .
+      target: production
+    ports: ["127.0.0.1:8020:8000"]
+    env_file: .env
+    environment:
+      REDIS_URL: "redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379/0"
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: "8000"
+      CHROMA_PERSIST_DIRECTORY: /app/data/chroma
+      CONTENTOPSMIND_SKILLS_DIR: /app/skills
+      EVAL_BASELINE_PATH: /app/data/eval/baseline.json
+    depends_on:
+      redis:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+    volumes: ["runtime-data:/app/data/runtime", "app-logs:/app/logs"]
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    profiles: ["monitoring"]
+    ports: ["127.0.0.1:9093:9090"]
+    volumes:
+      ["./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro", "prometheus-data:/prometheus"]
+volumes:
+  redis-data:
+  chroma-data:
+  runtime-data:
+  app-logs:
+  prometheus-data:

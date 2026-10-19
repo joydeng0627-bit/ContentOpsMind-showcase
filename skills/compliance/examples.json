@@ -1,0 +1,25 @@
+{
+  "examples": [
+    {
+      "text": "我最喜欢的一点是杯盖很好清洗",
+      "expected": { "decision": "pass", "risk_ids": [] },
+      "reason": "第一人称主观体验，不是客观最高级主张"
+    },
+    {
+      "text": "七天保证减重",
+      "expected": { "decision": "blocked", "risk_ids": ["unsupported_efficacy"] },
+      "reason": "缺少证据的保证性健康功效"
+    },
+    {
+      "text": "全城最低价",
+      "expected": { "decision": "blocked", "risk_ids": ["absolute_price"] },
+      "reason": "无法证明的绝对价格优势"
+    },
+    {
+      "text": "检测报告显示达到一级能效",
+      "context": { "evidence_refs": ["REPORT-E1"] },
+      "expected": { "decision": "pass", "risk_ids": [] },
+      "reason": "有明确依据的客观等级说明"
+    }
+  ]
+}
