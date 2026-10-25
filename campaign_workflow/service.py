@@ -1698,6 +1698,16 @@ class CampaignWorkflowService:
                     latest is not None
                     and latest.decision != ReviewDecision.EXECUTION_FAILED
                     and not latest.error_code
+                    and latest.content_hash == version.content_hash
+                    and latest.knowledge_snapshot_hash
+                    == context.knowledge_snapshot_hash
+                    and not (
+                        latest.decision == ReviewDecision.PASS
+                        and any(
+                            item.impact in {"required_change", "blocking_issue"}
+                            for item in latest.evidence
+                        )
+                    )
                 ):
                     continue
                 attempt = (latest.attempt + 1) if latest is not None else 1
@@ -2129,6 +2139,26 @@ class CampaignWorkflowService:
                     if review_type != "compliance" or raw_rule_id in RULES_BY_ID
                     else "unknown_rule"
                 )
+                # A clearly informational pass note is not a required correction.
+                # Keep the original finding and raw output for audit; never downgrade
+                # explicit corrective impacts or compliance risk_items.
+                no_action = (
+                    lambda value: str(value or "").strip().rstrip("。.!！").lower()
+                )
+                informational_pass = (
+                    review_type in {"content_quality", "fact_check"}
+                    and structured.get("decision") == "pass"
+                    and structured.get("need_revision") is False
+                    and str(item.get("severity") or "").lower() == "info"
+                    and no_action(item.get("suggestion"))
+                    in {
+                        "无需修改",
+                        "无需修改建议",
+                        "no changes needed",
+                        "no change required",
+                    }
+                    and no_action(item.get("impact")) in {"", "无", "none", "no impact"}
+                )
                 configured_decision = str(
                     RULES_BY_ID.get(rule_id, {}).get("decision", "changes_required")
                 )
@@ -2144,6 +2174,8 @@ class CampaignWorkflowService:
                         )
                     )
                 )
+                if informational_pass:
+                    impact = "non_blocking_suggestion"
                 if impact not in {
                     "blocking_issue",
                     "required_change",
@@ -2900,6 +2932,9 @@ class CampaignWorkflowService:
             "decision 只能是 pass、changes_required、blocked；pass 对应 need_revision=false，"
             "其余两者对应 true。findings 每项包含 rule_id、severity、matched_text、"
             "evidence_refs、reason、suggestion、impact。"
+            "findings 只列实际问题或可选建议，不列检查通过项；没有问题时返回空数组。"
+            "impact 只能为 blocking_issue、required_change、non_blocking_suggestion、delivery_configuration；"
+            "不得用自由文本描述 impact。可选建议使用 non_blocking_suggestion。"
             f"scope 必须为 {scope}。\n\n"
             "冻结 ReviewContext 由背景消息中的 FROZEN_REVIEW_CONTEXT 提供。"
         )
